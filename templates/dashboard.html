@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- FLASH MESSAGES -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="container mt-3">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show text-center w-75 mx-auto">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="container mt-5">
+
+    <!-- Welcome -->
+    <h4 class="text-black mb-4">Welcome, {{ session.username }}</h4>
+
+    <div class="row">
+
+        <!-- LEFT SIDE -->
+        <div class="col-md-7">
+
+            <!-- Upload -->
+            <div class="glass-card mb-4">
+                <h4>Upload File</h4>
+
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="file" name="file" class="form-control mb-2" required>
+                    <button class="btn btn-primary">Upload</button>
+                </form>
+            </div>
+
+            <!-- Your Files -->
+            <div class="glass-card mb-4">
+                <h4>Your Files</h4>
+
+                <ul class="list-group">
+                    {% for file in files %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+
+                        <div class="text-truncate" style="max-width: 60%;">
+                            {{ file[1].split('_', 1)[1] }}
+                        </div>
+
+                        <div>
+                            <a href="/download/{{ file[0] }}" class="btn btn-success btn-sm">Download</a>
+                            <a href="/delete/{{ file[0] }}" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Are you sure you want to delete this file?')">Delete</a>
+                        </div>
+
+                    </li>
+
+                    <!-- Share -->
+                    <form action="/share/{{ file[0] }}" method="POST" class="d-flex mt-2">
+                        <input type="text" name="username" placeholder="Username" class="form-control me-2">
+                        <button class="btn btn-primary btn-sm">Share</button>
+                    </form>
+
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Shared With Me -->
+            <div class="glass-card mb-4">
+                <h4>Shared With Me</h4>
+                <ul class="list-group">
+                    {% for file in shared_files %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+
+                        <div class="text-truncate" style="max-width: 60%;">
+                            {{ file[1].split('_', 1)[1] }}
+                        </div>
+                        <a href="/download/{{ file[0] }}" class="btn btn-success btn-sm">Download</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="col-md-5">
+
+            <!-- Online Users -->
+            <div class="glass-card mb-4">
+                <h4>Online Users</h4>
+                <ul id="usersList" class="list-group"></ul>
+            </div>
+
+            <!-- File Transfer -->
+            <div class="glass-card mb-4">
+                <h5>File Transfer</h5>
+
+                <p id="statusText" class="mb-1 fw-semibold">Status: Idle</p>
+                <small id="fileInfo" class="text-dark fw-semibold">No file selected</small>
+
+                <div class="progress mt-2">
+                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                        style="width: 0%">
+                        0%
+                    </div>
+                </div>
+
+                <button id="cancelBtn" class="btn btn-danger btn-sm mt-2 d-none">
+                    Cancel Transfer
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Hidden file input -->
+    <input type="file" id="fileInput" style="display:none;">
+
+</div>
+
+<!-- AUTO DISMISS ALERT -->
+<script>
+  setTimeout(() => {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+      alert.classList.remove('show');
+      alert.classList.add('fade');
+
+      setTimeout(() => {
+        alert.remove();
+      }, 500);
+    });
+  }, 3000);
+</script>
+
+<!-- SOCKET -->
+<script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+
+<script>
+    const currentUsername = "{{ session.username }}";
+</script>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+{% endblock %}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}SecureShare{% endblock %}</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+
+    <!-- NAVBAR -->
+    <nav class="navbar-custom">
+        <div class="logo">
+            <span class="logo-icon">🔒</span>
+            <span>SecureShare</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="/">Home</a>
+
+            {% if session.get('username') %}
+            <a href="/dashboard" class="login-btn">Dashboard</a>
+            <a href="/profile" class="login-btn">Manage Profile</a>
+            <a href="/logout" class="login-btn">Logout</a>
+            {% else %}
+            <a href="/login" class="login-btn">Login</a>
+            <a href="/register" class="login-btn">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- PAGE CONTENT -->
+    <div class="main-wrapper">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

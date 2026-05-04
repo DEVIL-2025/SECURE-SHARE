@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+
+<section class="hero d-flex align-items-center justify-content-center">
+
+    <div class="glass-card p-4" style="width: 350px;">
+
+        <h3 class="text-center mb-4">Register</h3>
+
+        <form method="POST">
+
+            <input type="text" name="username" placeholder="Enter Username" class="form-control mb-3" required>
+
+            <input type="email" name="email" placeholder="Enter Email" class="form-control mb-3" required>
+
+            <input type="password" name="password" placeholder="Enter Password" class="form-control mb-3" required>
+
+            <button class="btn-primary-custom w-100">Register</button>
+
+        </form>
+
+        <div class="text-center mt-3">
+            <p style="color: #000000; margin-bottom: 8px;">
+                Already have an account?
+            </p>
+            <a href="/login" class="btn-outline-custom d-inline-block">
+                Login
+            </a>
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

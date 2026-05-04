@@ -1,0 +1,4 @@
+*.pem
+database.db
+__pycache__/
+uploads/

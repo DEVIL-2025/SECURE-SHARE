@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - SecureShare{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="row g-4">
+
+        <!-- LEFT: PROFILE INFO -->
+        <div class="col-md-5">
+            <div class="card profile-card text-center p-4">
+
+
+                <h4 id="username"></h4>
+                <p id="email"></p>
+
+
+
+                <hr>
+
+
+                <button class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                    Edit Profile
+                </button>
+
+                <hr>
+                <!-- Account Details -->
+                <div class="card profile-card p-4 mb-4">
+                    <h5>Account Details</h5>
+                    <hr>
+
+                    <p><strong>Files Sent:</strong> <span id="sent"></span></p>
+                    <p><strong>Files Received:</strong> <span id="received"></span></p>
+                    <p><strong>Last Active:</strong> <span id="lastActive"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: DETAILS -->
+        <div class="col-md-7">
+
+
+            <!-- Recent Activity -->
+            <div class="col-md-7">
+
+                <div class="card profile-card p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Activity</h5>
+                        <button id="loadMoreBtn" class="btn btn-sm btn-outline-primary">
+                            Load More
+                        </button>
+                    </div>
+
+                    <ul id="transferList" class="list-group activity-list mt-3"></ul>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- EDIT PROFILE MODAL -->
+<div class="modal fade" id="editProfileModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white p-4 rounded-4">
+
+            <h5>Edit Profile</h5>
+            <hr>
+
+            <!-- 🔥 MESSAGE BOX -->
+            <div id="updateMsg" class="small mb-2"></div>
+
+            <!-- USERNAME -->
+            <label class="mb-1">New Username</label>
+            <input type="text" id="newUsername" class="form-control mb-2">
+
+            <!-- CURRENT PASSWORD -->
+            <label class="mb-1">Current Password</label>
+            <input type="password" id="currentPassword" class="form-control mb-2">
+
+            <!-- NEW PASSWORD -->
+            <label class="mb-1">New Password</label>
+            <input type="password" id="newPassword" class="form-control mb-3">
+
+            <!-- SAVE BUTTON -->
+            <button onclick="updateProfile()" class="btn btn-success w-100">
+                Save Changes
+            </button>
+
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+
+{% endblock %}

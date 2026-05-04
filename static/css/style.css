@@ -1,0 +1,197 @@
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    color: #1e293b;
+    background-color: #e0f2fe;
+    position: relative;
+    z-index: 0;
+}
+
+/* VIDEO BACKGROUND (disabled) */
+#bg-video {
+    display: none;
+}
+
+/* OVERLAY (removed) */
+body::before {
+    display: none;
+}
+
+/* ===== NAVBAR - FIXED (STRONG CONTRAST) ===== */
+.navbar-custom {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 40px;
+    background: #0284c7; /* strong blue */
+    border-bottom: 1px solid #0369a1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* LOGO */
+.logo {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.logo-icon {
+    color: #bae6fd;
+}
+
+/* Links */
+.nav-links a {
+    margin-left: 20px;
+    color: #ffffff;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+/* Hover */
+.nav-links a:hover {
+    color: #bae6fd;
+}
+
+/* ===== BUTTONS WITH HOVER EFFECT ===== */
+.btn-primary-custom {
+    background: #2563eb;
+    padding: 12px 25px;
+    border-radius: 8px;
+    color: white;
+    text-decoration: none;
+    transition: all 0.25s ease;
+}
+
+.btn-primary-custom:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+}
+
+/* Outline Button */
+.btn-outline-custom {
+    border: 1px solid #2563eb;
+    padding: 12px 25px;
+    border-radius: 8px;
+    color: #2563eb;
+    text-decoration: none;
+    transition: all 0.25s ease;
+}
+
+.btn-outline-custom:hover {
+    background: #2563eb;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* HERO */
+.hero {
+    height: 90vh;
+}
+
+/* ===== CARDS ===== */
+.glass-card {
+    background: #ffffff;
+    border: 1px solid #bae6fd;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Headings */
+.glass-card h4,
+.glass-card h5 {
+    color: #1e293b;
+    margin-bottom: 15px;
+}
+
+/* Inputs */
+.glass-card .form-control,
+.glass-card input {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    color: #1e293b;
+}
+
+/* Placeholder */
+.glass-card input::placeholder {
+    color: #94a3b8;
+}
+
+/* List */
+.glass-card .list-group-item {
+    background: transparent;
+    border: none;
+    color: #334155;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* Progress */
+.progress {
+    background: #e2e8f0;
+}
+
+/* FOOTER */
+.footer {
+    background: #e0f2fe;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+    body {
+        background: #e0f2fe;
+    }
+
+    .navbar-custom {
+        padding: 12px 20px;
+    }
+}
+
+/* ===== STATUS ===== */
+.user-status {
+    color: #16a34a;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.user-online {
+    color: #0284c7;
+    font-size: 13px;
+}
+
+/* ===== PROFILE ===== */
+.profile-card {
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border-radius: 20px;
+    color: #1e293b;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+
+.profile-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border: 2px solid #e2e8f0;
+}
+
+
+.activity-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border-radius: 12px;
+}
+
+.activity-item {
+    background: #f8fafc;
+    border: none;
+    border-bottom: 1px solid #e2e8f0;
+    color: #1e293b;
+    font-size: 14px;
+    padding: 10px 12px;
+    transition: all 0.2s ease;
+}
+
+.activity-item:hover {
+    background: #e0f2fe;
+    transform: translateX(4px);
+}

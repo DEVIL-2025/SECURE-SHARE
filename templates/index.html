@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="container mt-3">
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show text-center" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<!-- HERO -->
+<section class="hero text-center d-flex align-items-center justify-content-center">
+    <div class="hero-content">
+
+        <h1 class="hero-title">Fast. Encrypted. Reliable File Transfer.</h1>
+
+        <p class="hero-subtitle mt-3">
+            Send files instantly with end-to-end encryption and real-time tracking.
+        </p>
+
+        <div class="hero-buttons mt-4 d-flex justify-content-center gap-3">
+            {% if session.get('username') %}
+            <a href="/dashboard" class="btn-primary-custom">Get Started</a>
+            <a href="/#features" class="btn-primary-custom">Features</a>
+            <a href="/#how" class="btn-primary-custom">How It Works</a>
+
+            {% else %}
+            <a href="/register" class="btn-primary-custom">Get Started</a>
+            <a href="/#features" class="btn-primary-custom">Features</a>
+            <a href="/#how" class="btn-primary-custom">How It Works</a>
+            {% endif %}
+
+        </div>
+
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="features section-padding py-5 text-center">
+    <div class="container">
+
+        <h2 class="section-title mb-5">Features</h2>
+
+        <div class="row g-4">
+
+            <div class="col-md-4">
+                <div class="glass-card feature-card">
+                    <h5>🔐 Secure Encryption</h5>
+                    <p>Files are encrypted before transfer ensuring privacy.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="glass-card feature-card">
+                    <h5>⚡ Real-Time Transfer</h5>
+                    <p>Instant transfer using WebSockets.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="glass-card feature-card">
+                    <h5>📡 Live Connection</h5>
+                    <p>Connect with users before sending files.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="glass-card feature-card">
+                    <h5>📦 Chunk Upload</h5>
+                    <p>Large files are sent in chunks for reliability.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="glass-card feature-card">
+                    <h5>☁️ Cloud Storage</h5>
+                    <p>Upload files securely to server storage for later access.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="glass-card feature-card">
+                    <h5>📊 Transfer Tracking</h5>
+                    <p>Track file transfer progress in real-time.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="how-it-works section-padding py-5 text-center">
+    <div class="container">
+
+        <h2 class="section-title mb-5">How It Works</h2>
+
+        <div class="row g-4">
+
+            <div class="col-md-4">
+                <div class="glass-card">
+                    <h5>1. Connect</h5>
+                    <p>Send connection request to a user.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="glass-card">
+                    <h5>2. Select File</h5>
+                    <p>Choose file for secure transfer.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="glass-card">
+                    <h5>3. Transfer</h5>
+                    <p>File is encrypted and sent instantly.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta section-padding text-center py-5">
+    <div class="container glass-card">
+        <h3 class="mb-3">Start transferring securely today</h3>
+        <a href="/dashboard" class="btn-primary-custom">Get Started</a>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer text-center py-3">
+    <p class="mb-0">© 2026 SecureShare</p>
+</footer>
+
+<!-- SCROLL ANIMATION -->
+<script>
+    const cards = document.querySelectorAll(".glass-card");
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = 1;
+                entry.target.style.transform = "translateY(0)";
+            }
+        });
+    });
+
+    cards.forEach(card => {
+        card.style.opacity = 0;
+        card.style.transform = "translateY(40px)";
+        card.style.transition = "0.6s ease";
+        observer.observe(card);
+    });
+</script>
+
+{% endblock %}
