@@ -107,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             let percent = Math.floor((offset / file.size) * 100);
+            percent = Math.min(100, percent);
 
             const bar = document.getElementById("progressBar");
             bar.style.width = percent + "%";
@@ -409,7 +410,9 @@ document.addEventListener("DOMContentLoaded", () => {
         currentFileName = data.fileName;
 
 
-        totalFileSize = data.totalSize || 0;
+        if (!totalFileSize && data.totalSize) {
+            totalFileSize = data.totalSize;
+        }
 
 
         receivedSize += byteArray.length;
@@ -422,6 +425,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (totalFileSize > 0) {
             percent = Math.floor((receivedSize / totalFileSize) * 100);
+            percent = Math.min(100, Math.max(0, percent));
         }
 
         const bar = document.getElementById("progressBar");
