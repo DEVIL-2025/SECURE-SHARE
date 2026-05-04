@@ -697,63 +697,56 @@ def update_profile():
           
 #DATABASE  
 def init_db():
+    import os
+
+    # 🔥 DELETE old DB (fresh start)
+    if os.path.exists("database.db"):
+        os.remove("database.db")
+
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
     
+    # USERS TABLE (with sent + received)
     cursor.execute('''
-                   
-            CREATE TABLE IF NOT EXISTS users(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT,
-                password TEXT,
-                email TEXT
-            )
-            
-        ''')
-    
-    cursor.execute('''
-                   
-            CREATE TABLE IF NOT EXISTS files(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                filename TEXT NOT NULL,
-                username TEXT NOT NULL
-            )
-        ''')
-            
-    cursor.execute('''
-                   
-            CREATE TABLE IF NOT EXISTS shared_files(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                file_id INTEGER,
-                shared_with TEXT NOT NULL
-            )    
-            
-        ''')
-    
-    #cursor.execute('''
-                #ALTER TABLE files ADD COLUMN file_key TEXT;  
-       # ''')
-       
-    cursor.execute('''
-            CREATE TABLE IF NOT EXISTS transfers(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                sender TEXT,
-                receiver TEXT,
-                filename TEXT,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
+        CREATE TABLE IF NOT EXISTS users(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            password TEXT,
+            email TEXT,
+            sent INTEGER DEFAULT 0,
+            received INTEGER DEFAULT 0
+        )
     ''')
-       
-    # try:
-    #     cursor.execute("ALTER TABLE users ADD COLUMN sent INTEGER DEFAULT 0")
-    # except:
-    #     pass
-
-    # try:
-    #     cursor.execute("ALTER TABLE users ADD COLUMN received INTEGER DEFAULT 0")
-    # except:
-    #     pass
-      
+    
+    # FILES TABLE (with file_key)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS files(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            filename TEXT NOT NULL,
+            username TEXT NOT NULL,
+            file_key TEXT
+        )
+    ''')
+            
+    # SHARED FILES
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS shared_files(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            file_id INTEGER,
+            shared_with TEXT NOT NULL
+        )
+    ''')
+    
+    # TRANSFERS
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS transfers(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sender TEXT,
+            receiver TEXT,
+            filename TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
 
     conn.commit()
     conn.close()
