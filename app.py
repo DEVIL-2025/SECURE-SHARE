@@ -39,6 +39,9 @@ connections = set()
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'mkv'}
 
 #HELPER FUNCTION
@@ -699,9 +702,7 @@ def update_profile():
 def init_db():
     import os
 
-    # 🔥 DELETE old DB (fresh start)
-    if os.path.exists("database.db"):
-        os.remove("database.db")
+
 
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
