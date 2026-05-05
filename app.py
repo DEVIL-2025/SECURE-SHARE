@@ -114,7 +114,7 @@ def login():
         
         conn.close()
         
-        if user and check_password_hash(user[1], password):
+        if user and check_password_hash(user[2], password):
             session['username'] = username
             
             flash("Login successful!", "success")
