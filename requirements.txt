@@ -4,3 +4,4 @@ eventlet
 cryptography
 werkzeug
 gunicorn
+psycopg2-binary

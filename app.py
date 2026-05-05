@@ -2,7 +2,10 @@
 import os
 import io
 import uuid
-import sqlite3
+import psycopg2
+
+def get_db_connection():
+    return psycopg2.connect(os.getenv("DATABASE_URL"), sslmode='require')
 
 #FLASK
 from flask import Flask, render_template, request, redirect, send_file, session, send_from_directory, flash, jsonify, url_for
@@ -68,11 +71,11 @@ def register():
         
         hashed_password = generate_password_hash(password)
         
-        conn = sqlite3.connect('database.db')
+        conn = get_db_connection()
         cursor = conn.cursor()
         
         # 🔍 Check if user already exists
-        cursor.execute("SELECT * FROM users WHERE username=? OR email=?", (username, email))
+        cursor.execute("SELECT * FROM users WHERE username=%s OR email=%s", (username, email))
         existing_user = cursor.fetchone()
 
         if existing_user:
@@ -81,7 +84,7 @@ def register():
             return redirect('/')
         
         
-        cursor.execute("INSERT INTO users(username,password,email) values (?, ?, ?)", (username, hashed_password, email))
+        cursor.execute("INSERT INTO users(username,password,email) values (%s, %s, %s)", (username, hashed_password, email))
         
         
         conn.commit()
@@ -101,17 +104,17 @@ def login():
         password = request.form['password']
         email = request.form['email']
         
-        conn = sqlite3.connect('database.db')
-        cursor=conn.cursor()
+        conn = get_db_connection()
+        cursor = conn.cursor()
         
-        cursor.execute("SELECT * FROM users WHERE username=? AND email = ?", (username, email))
+        cursor.execute("SELECT * FROM users WHERE username=%s AND email = %s", (username, email))
         user = cursor.fetchone()
         
         print(user)
         
         conn.close()
         
-        if user and check_password_hash(user[2], password):
+        if user and check_password_hash(user[1], password):
             session['username'] = username
             
             flash("Login successful!", "success")
@@ -169,10 +172,10 @@ def dashboard():
             ) 
             
             #save to DB
-            conn=sqlite3.connect('database.db')
+            conn = get_db_connection()
             c = conn.cursor()
             
-            c.execute("INSERT INTO files (filename, username, file_key) VALUES (?, ?, ?)",
+            c.execute("INSERT INTO files (filename, username, file_key) VALUES (%s, %s, %s)",
                       (filename, session['username'], encrypted_key.hex()))
             
             conn.commit()
@@ -186,10 +189,10 @@ def dashboard():
             return redirect(url_for('dashboard'))
     
     #Fetch user's files
-    conn=sqlite3.connect('database.db')
+    conn = get_db_connection()
     c = conn.cursor()
     
-    c.execute("SELECT id, filename FROM files WHERE username=?", (session['username'],))
+    c.execute("SELECT id, filename FROM files WHERE username=%s", (session['username'],))
     files=c.fetchall()
     
     # Files shared with current user
@@ -198,7 +201,7 @@ def dashboard():
     FROM files 
     JOIN shared_files 
     ON files.id = shared_files.file_id 
-    WHERE shared_files.shared_with=?
+    WHERE shared_files.shared_with=%s
     """, (session['username'],))
 
     shared_files = c.fetchall()    
@@ -224,13 +227,15 @@ def download(file_id):
     if 'username' not in session:
         return "Login required"
     
-    conn=sqlite3.connect('database.db')
+    conn = get_db_connection()
     c=conn.cursor()
     
-    c.execute("SELECT filename, username, file_key FROM files WHERE id=?", (file_id,))
+    c.execute("SELECT filename, username, file_key FROM files WHERE id=%s", (file_id,))
     
     file=c.fetchone()
-    #conn.close()
+    if not file:
+        conn.close()
+        return "File not found"
     
     if file:
 
@@ -238,7 +243,7 @@ def download(file_id):
 
         
         # Check if shared
-        c.execute("SELECT * FROM shared_files WHERE file_id=? AND shared_with=?", 
+        c.execute("SELECT * FROM shared_files WHERE file_id=%s AND shared_with=%s", 
                 (file_id, session['username']))
         shared = c.fetchone()
         conn.close()
@@ -292,11 +297,11 @@ def delete_file(file_id):
     if 'username' not in session:
         return "Please Login First"
     
-    conn=sqlite3.connect('database.db')
+    conn = get_db_connection()
     c=conn.cursor()
     
     #get file info
-    c.execute("SELECT filename, username FROM files where id = ?",(file_id,))
+    c.execute("SELECT filename, username FROM files where id = %s",(file_id,))
     file=c.fetchone()
     
     if file:
@@ -309,9 +314,9 @@ def delete_file(file_id):
             if os.path.exists(filepath):
                 os.remove(filepath)
             
-            c.execute("DELETE FROM files WHERE id = ?",(file_id,))
+            c.execute("DELETE FROM files WHERE id = %s",(file_id,))
             conn.commit()
-            conn.close()
+    conn.close()
     return redirect('/dashboard')
 
 #SHARE FILE
@@ -322,23 +327,23 @@ def share(file_id):
     
     shared_user = request.form['username']
     
-    conn = sqlite3.connect('database.db')
+    conn = get_db_connection()
     c = conn.cursor()
     
     #check ownership
-    c.execute("SELECT username FROM files WHERE id=?", (file_id,))
+    c.execute("SELECT username FROM files WHERE id=%s", (file_id,))
     owner = c.fetchone()
     
     if owner and owner[0] == session['username']:
         
         # check if user exists
-        c.execute("SELECT * FROM users WHERE username=?", (shared_user,))
+        c.execute("SELECT * FROM users WHERE username=%s", (shared_user,))
         user_exists = c.fetchone()
 
         if not user_exists:
             return "User does not exist"
         
-        c.execute("INSERT INTO shared_files (file_id, shared_with) VALUES (?, ?)",
+        c.execute("INSERT INTO shared_files (file_id, shared_with) VALUES (%s, %s)",
         (file_id, shared_user))
                  
         conn.commit()
@@ -507,15 +512,15 @@ def handle_chunk(data):
         receiver = receiver_username
         filename = data.get("fileName")
 
-        conn = sqlite3.connect('database.db')
+        conn = get_db_connection()
         cursor = conn.cursor()
 
-        cursor.execute("UPDATE users SET sent = sent + 1 WHERE username=?", (sender,))
-        cursor.execute("UPDATE users SET received = received + 1 WHERE username=?", (receiver,))
+        cursor.execute("UPDATE users SET sent = sent + 1 WHERE username=%s", (sender,))
+        cursor.execute("UPDATE users SET received = received + 1 WHERE username=%s", (receiver,))
         
         cursor.execute("""
             INSERT INTO transfers (sender, receiver, filename)
-            VALUES (?, ?, ?)
+            VALUES (%s, %s, %s)
         """, (sender, receiver, filename))
         
         conn.commit()
@@ -580,10 +585,10 @@ def profile_data():
 
     username = session.get("username")
 
-    conn = sqlite3.connect('database.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT username, email, sent, received FROM users WHERE username=?", (username,))
+    cursor.execute("SELECT username, email, sent, received FROM users WHERE username=%s", (username,))
     user = cursor.fetchone()
 
     conn.close()
@@ -613,15 +618,15 @@ def recent_transfers():
     except ValueError:
         return jsonify({"error": "Invalid parameters"}), 400
 
-    conn = sqlite3.connect('database.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
         SELECT sender, receiver, filename, timestamp
         FROM transfers
-        WHERE sender=? OR receiver=?
+        WHERE sender=%s OR receiver=%s
         ORDER BY id DESC
-        LIMIT ? OFFSET ?
+        LIMIT %s OFFSET %s
     """, (username, username, limit, start))
 
     rows = cursor.fetchall()
@@ -651,10 +656,10 @@ def update_profile():
 
     username = session.get("username")
 
-    conn = sqlite3.connect('database.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT password FROM users WHERE username=?", (username,))
+    cursor.execute("SELECT password FROM users WHERE username=%s", (username,))
     user = cursor.fetchone()
 
     if not user:
@@ -669,15 +674,15 @@ def update_profile():
 
     # 🔄 UPDATE USERNAME EVERYWHERE
     if new_username and new_username != username:
-        cursor.execute("SELECT * FROM users WHERE username=?", (new_username,))
+        cursor.execute("SELECT * FROM users WHERE username=%s", (new_username,))
         if cursor.fetchone():
             return jsonify({"error": "Username already taken"}), 400
 
-        cursor.execute("UPDATE users SET username=? WHERE username=?", (new_username, username))
-        cursor.execute("UPDATE files SET username=? WHERE username=?", (new_username, username))
-        cursor.execute("UPDATE transfers SET sender=? WHERE sender=?", (new_username, username))
-        cursor.execute("UPDATE transfers SET receiver=? WHERE receiver=?", (new_username, username))
-        cursor.execute("UPDATE shared_files SET shared_with=? WHERE shared_with=?", (new_username, username))
+        cursor.execute("UPDATE users SET username=%s WHERE username=%s", (new_username, username))
+        cursor.execute("UPDATE files SET username=%s WHERE username=%s", (new_username, username))
+        cursor.execute("UPDATE transfers SET sender=%s WHERE sender=%s", (new_username, username))
+        cursor.execute("UPDATE transfers SET receiver=%s WHERE receiver=%s", (new_username, username))
+        cursor.execute("UPDATE shared_files SET shared_with=%s WHERE shared_with=%s", (new_username, username))
 
         session["username"] = new_username
 
@@ -690,7 +695,7 @@ def update_profile():
             return jsonify({"error": "Wrong current password"}), 400
 
         hashed = generate_password_hash(new_password)
-        cursor.execute("UPDATE users SET password=? WHERE username=?", (hashed, session["username"]))
+        cursor.execute("UPDATE users SET password=%s WHERE username=%s", (hashed, session["username"]))
 
     conn.commit()
     conn.close()
@@ -700,18 +705,14 @@ def update_profile():
           
 #DATABASE  
 def init_db():
-    import os
-
-
-
-    conn = sqlite3.connect('database.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
     
-    # USERS TABLE (with sent + received)
+    # USERS TABLE
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT,
+            id SERIAL PRIMARY KEY,
+            username TEXT UNIQUE,
             password TEXT,
             email TEXT,
             sent INTEGER DEFAULT 0,
@@ -719,10 +720,10 @@ def init_db():
         )
     ''')
     
-    # FILES TABLE (with file_key)
+    # FILES TABLE
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS files(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             filename TEXT NOT NULL,
             username TEXT NOT NULL,
             file_key TEXT
@@ -732,7 +733,7 @@ def init_db():
     # SHARED FILES
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS shared_files(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             file_id INTEGER,
             shared_with TEXT NOT NULL
         )
@@ -741,18 +742,16 @@ def init_db():
     # TRANSFERS
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS transfers(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             sender TEXT,
             receiver TEXT,
             filename TEXT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
 
     conn.commit()
     conn.close()
-
-init_db()
 
 
 if __name__ == '__main__':
